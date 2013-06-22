@@ -1,0 +1,9 @@
+/target
+*.sublime*
+*.class
+/*.mdmp
+/*.dump
+/.classpath
+/var
+/.project
+/.settings
