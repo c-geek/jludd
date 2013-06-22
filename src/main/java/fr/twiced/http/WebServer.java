@@ -25,7 +25,7 @@ import org.eclipse.jetty.webapp.WebAppContext;
  */
 public class WebServer {
 	private static final String LOG_PATH = "./var/logs/access/yyyy_mm_dd.request.log";
-	private static final String PROJECT_RELATIVE_PATH_TO_WEBAPP = "src/webapp";
+	private static final String PROJECT_RELATIVE_PATH_TO_WEBAPP = "src/main/resources";
 
 	public static void main(final String[] args) throws Exception {
 		boolean fromCLI = true;
@@ -37,11 +37,11 @@ public class WebServer {
 		server.join();
 	}
 	
-	public static interface WebContext {
-		public File getWarPath();
-
-		public String getContextPath();
-	}
+//	public static interface WebContext {
+//		public File getWarPath();
+//
+//		public String getContextPath();
+//	}
 
 	private Server server;
 	private int port;

@@ -16,7 +16,7 @@ id="WebApp_ID" version="3.0">
 <context-param>
     <param-name>contextConfigLocation</param-name>
     <param-value>
-        /WEB-INF/applicationContext.xml
+        /applicationContext.xml
     </param-value>
 </context-param>
 
@@ -28,7 +28,7 @@ id="WebApp_ID" version="3.0">
     </servlet-class>
     <init-param>
         <param-name>contextConfigLocation</param-name>
-        <param-value>/WEB-INF/web-context.xml</param-value>
+        <param-value>/web-context.xml</param-value>
     </init-param>
     <load-on-startup>1</load-on-startup>
 </servlet>

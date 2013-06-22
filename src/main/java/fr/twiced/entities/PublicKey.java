@@ -86,7 +86,6 @@ public class PublicKey {
 		udid2 = udid2 == null ? "" : udid2;
 		name = name == null ? "" : name;
 		email = email == null ? "" : email;
-		System.out.println(name + " " + udid2 + " " + email);
 	}
 
 	public Integer getVersion() {

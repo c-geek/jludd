@@ -20,33 +20,40 @@ http://www.springframework.org/schema/context/spring-context-3.0.xsd">
 	<!-- Forwards requests to the "/" resource to the "home" view -->
 	<!-- <mvc:view-controller path="/" view-name="index"/> -->
 
-	<mvc:resources mapping="/images/**" location="WEB-INF/images/" />
-	<mvc:resources mapping="/css/**" location="WEB-INF/css/" />
-	<mvc:resources mapping="/scripts/**" location="WEB-INF/scripts/" />
-	<mvc:resources mapping="/favicon.ico" location="WEB-INF/images/favicon.ico" />
+	<mvc:resources mapping="/images/**" location="/images/" />
+	<mvc:resources mapping="/css/**" location="/css/" />
+	<mvc:resources mapping="/scripts/**" location="/scripts/" />
+	<mvc:resources mapping="/favicon.ico" location="/images/favicon.ico" />
 
 	<!-- Resolve jsp's -->
 	<bean id="viewResolver"
 		class="org.springframework.web.servlet.view.UrlBasedViewResolver">
 		<property name="viewClass"
 			value="org.springframework.web.servlet.view.JstlView" />
-		<property name="prefix" value="/WEB-INF/views/" />
+		<property name="prefix" value="/views/" />
 		<property name="suffix" value=".jsp" />
 	</bean>
 
 	<!-- i18n message source -->
 	<bean id="messageSource"
 		class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
-		<property name="basename" value="/WEB-INF/i18n/messages" />
+		<property name="basename" value="/i18n/messages" />
 		<property name="defaultEncoding" value="UTF-8" />
 		<property name="cacheSeconds" value="30" />
 	</bean>
 	
 	<!-- Database properties -->
+	<!-- <bean id="my-persistence-unit" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+    <property name="dataSource" ref="dataSource"/>
+    <property name="persistenceProviderClass" value="org.hibernate.ejb.HibernatePersistence"/>
+    <property name="jpaVendorAdapter">
+        <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter"/>
+    </property>
+	</bean> -->
 	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
 		<property name="locations">
 			<list>
-				<value>classpath:/fr/twiced/dao/db.properties</value>
+				<value>/db.properties</value>
 			</list>
 		</property>
 	</bean>
@@ -63,6 +70,8 @@ http://www.springframework.org/schema/context/spring-context-3.0.xsd">
 	<!-- JPA API -->
 	<bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
       <property name="dataSource" ref="dataSource" />
+    	<property name="persistenceProviderClass" value="org.hibernate.ejb.HibernatePersistence"/>
+    	<property name="packagesToScan" value="fr.twiced"/>
       <property name="jpaProperties">
 				<props>
 					<prop key="hibernate.current_session_context_class">thread</prop>
