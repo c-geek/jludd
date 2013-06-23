@@ -126,9 +126,9 @@ Here is a description of each field:
 * `MembersCount` is used in combination of `MembersRoot`, just like `VotersCount` is with `VotersRoot`.
 * `MembersChanges` contains a list of members joining or leaving the WoT. A joining member has a line starting with '+' and a leaving one with '-'.
 
-## Money issuances
+## Coins
 
-Money issuance is a simple message to create a new coin. It has the following structure:
+Coin is created when submitting a money issuance message. Such message has the following structure:
 
 	Version: VERSION
 	Issuer: INDIVIDUAL_FINGERPRINT
@@ -146,9 +146,13 @@ Here is a description of each field:
 * `Number` is an increment value indentifying this particular coin among those issued by this member. When a member issues a new coin, he MUST increment this value. The couple `Issuer` and `Number` MUST be unique and identifies a coin in the monetary system.
 * `Unity` is a decimal value between 1 and 9. This value is multiplied by 10^`Power` to form the monetary value of the coin.
 * `Power` is a decimal and positive value.
-* `AmendmentNumber` if present is the value of the `Number` field of an amendment declaring a Universal Dividend. It is the justification for creating this coin.
-* `AmendmentHash` is the hash of the pointed amendment, just to authentify the targeted amendment.
-* `FusionCoins` if present lists the coins used for the fusion. This field can't be present if `AmendNumber` already is.
+* `AmendmentNumber` if present, it is the value of the `Number` field of the source amendment with a Universal Dividend. It is the justification for creating this coin.
+* `AmendmentHash` is required if `AmendmentNumber` is present, otherwise it must not be present. It represents the hash of the pointed amendment, just to authentify the targeted amendment.
+* `FusionCoins` if present, lists the coins used for this fusion. This field and `AmendNumber` cannot be both present at the same time.
+
+The concatenation of `Issuer`, a `_` character and the `Number` field constitute the `COIN_ID`, which the unique identifier of a coin:
+
+	COIN_ID = ISSUER_NUMBER
 
 ## Transactions
 
