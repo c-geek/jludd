@@ -41,8 +41,7 @@ public class PksController {
 		Iterator<PublicKey> keys = pubkeys.iterator();
 		while(keys.hasNext()){
 			PublicKey k = keys.next();
-			k.processUid();
-			buff.append(k.getName() + " " + k.getUdid2() + " " + k.getEmail() +"\n");
+			buff.append(k.getFingerprintFormatted() + " " + k.getName() + " " + k.getComment() + " " + k.getEmail() +"\n");
 		}
 		return buff.toString();
 	}

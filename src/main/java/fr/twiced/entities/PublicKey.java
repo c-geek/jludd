@@ -1,6 +1,9 @@
 package fr.twiced.entities;
 
+import java.io.IOException;
 import java.sql.Blob;
+import java.sql.SQLException;
+import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -12,6 +15,11 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
+import javax.sql.rowset.serial.SerialBlob;
+import javax.sql.rowset.serial.SerialException;
+
+import org.bouncycastle.openpgp.PGPPublicKey;
+import org.bouncycastle.util.encoders.Hex;
 
 @Entity
 @Table(name = "pubkey")
@@ -35,11 +43,13 @@ public class PublicKey {
 	@Transient
 	private byte[] bytes;
 	@Transient
-	private String udid2;
+	private String comment;
 	@Transient
 	private String name;
 	@Transient
 	private String email;
+	@Transient
+	private boolean processed = false;
 
 	public Long getId() {
 		return id;
@@ -50,42 +60,7 @@ public class PublicKey {
 	}
 
 	public void setUid(String uid){
-		processUid(uid);
-	}
-
-	public void processUid(){
-		processUid(uid);
-	}
-
-	public void processUid(String uid){
-		Pattern p = Pattern.compile(REGEX_UDID);
-		Matcher m = p.matcher(uid);
-		if(m.matches()){
-			name = m.group(1);
-			udid2 = m.group(2);
-			email = m.group(3);
-		}
-		else{
-			p = Pattern.compile(REGEX_NAME_COMMENT_MAIL);
-			m = p.matcher(uid);
-			if(m.matches()){
-				name = m.group(1);
-				udid2 = m.group(2);
-				email = m.group(3);
-			}
-			else{
-				p = Pattern.compile(REGEX_NAME_MAIL);
-				m = p.matcher(uid);
-				if(m.matches()){
-					name = m.group(1);
-					email = m.group(2);
-				}
-			}
-		}
 		this.uid = uid;
-		udid2 = udid2 == null ? "" : udid2;
-		name = name == null ? "" : name;
-		email = email == null ? "" : email;
 	}
 
 	public Integer getVersion() {
@@ -112,24 +87,58 @@ public class PublicKey {
 		this.bytes = bytes;
 	}
 
-	public String getUdid2() {
-		return udid2;
-	}
-
 	public String getName() {
+		processUID();
 		return name;
 	}
 
+	public String getComment() {
+		processUID();
+		return comment;
+	}
+
 	public String getEmail() {
+		processUID();
 		return email;
 	}
 
-	public void setUdid(String udid) {
-		this.udid2 = udid;
+	private void processUID() {
+		if(!processed){
+			processed = true;
+			Pattern p = Pattern.compile(REGEX_UDID);
+			Matcher m = p.matcher(uid);
+			if(m.matches()){
+				this.name = m.group(1);
+				this.comment = m.group(2);
+				this.email = m.group(3);
+			}
+			else{
+				p = Pattern.compile(REGEX_NAME_COMMENT_MAIL);
+				m = p.matcher(uid);
+				if(m.matches()){
+					this.name = m.group(1);
+					this.comment = m.group(2);
+					this.email = m.group(3);
+				}
+				else{
+					p = Pattern.compile(REGEX_NAME_MAIL);
+					m = p.matcher(uid);
+					if(m.matches()){
+						this.name = m.group(1);
+						this.comment = "";
+						this.email = m.group(2);
+					}
+				}
+			}
+		}
 	}
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public void setComment(String comment) {
+		this.comment = comment;
 	}
 
 	public void setEmail(String email) {
@@ -146,5 +155,70 @@ public class PublicKey {
 
 	public void setFingerprint(String fingerprint) {
 		this.fingerprint = fingerprint;
+	}
+
+	public String getFingerprintFormatted() {
+		return getFormatFingerprint(fingerprint);
+	}
+	
+	public boolean isOpenUDCkey(){
+		return uid.matches(REGEX_UDID);
+	}
+	
+	public static String getFormatFingerprint(String fingerprint) {
+		Pattern p = Pattern.compile("(\\w{4})(\\w{4})(\\w{4})(\\w{4})(\\w{4})(\\w{4})(\\w{4})(\\w{4})(\\w{4})(\\w{4})");
+		Matcher m = p.matcher(fingerprint);
+		if(m.matches()){
+			StringBuffer buff = new StringBuffer(m.group(1));
+			for (int i = 2; i <= 10; i++) {
+				buff.append(" " + m.group(i));
+			}
+			return buff.toString().toUpperCase();
+		}
+		return fingerprint;
+	}
+	
+	public static PublicKey extract(PGPPublicKey pubKey) throws SerialException, SQLException, IOException{
+		PublicKey pk = new PublicKey();
+		String uid = extractBestUID(pubKey);
+		pk.setRaw(new SerialBlob(pubKey.getEncoded()));
+		pk.setUid(uid);
+		pk.setBytes(pubKey.getEncoded());
+		pk.setFingerprint(new String(Hex.encode(pubKey.getFingerprint())));
+		return pk;
+	}
+	
+	public static String extractBestUID(PGPPublicKey pubKey){
+		Iterator<String> it = pubKey.getUserIDs();
+		String bestUID = "";
+		int bestLevel = -1;
+		while (it.hasNext()) {
+			String uid = (String) it.next();
+			int level = 0;
+			Pattern p = Pattern.compile(REGEX_UDID);
+			Matcher m = p.matcher(uid);
+			if(m.matches()){
+				level = 3;
+			}
+			else{
+				p = Pattern.compile(REGEX_NAME_COMMENT_MAIL);
+				m = p.matcher(uid);
+				if(m.matches()){
+					level = 2;
+				}
+				else{
+					p = Pattern.compile(REGEX_NAME_MAIL);
+					m = p.matcher(uid);
+					if(m.matches()){
+						level = 1;
+					}
+				}
+			}
+			if(level > bestLevel){
+				bestLevel = level;
+				bestUID = uid;
+			}
+		}
+		return bestUID;
 	}
 }

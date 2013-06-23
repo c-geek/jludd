@@ -7,4 +7,5 @@ import javax.persistence.metamodel.StaticMetamodel;
 public class PublicKey_ {
 	
 	public static volatile SingularAttribute<PublicKey, String> uid;
+	public static volatile SingularAttribute<PublicKey, String> fingerprint;
 }

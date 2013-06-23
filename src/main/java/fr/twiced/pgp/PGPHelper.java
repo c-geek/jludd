@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
-import javax.sql.rowset.serial.SerialBlob;
 import javax.sql.rowset.serial.SerialException;
 
 import org.bouncycastle.bcpg.ArmoredOutputStream;
@@ -53,13 +52,7 @@ public class PGPHelper {
 						isSubKey = isSubKey || sig.getSignatureType() == PGPSignature.SUBKEY_BINDING;
 					}
 					if(!isSubKey){
-						PublicKey pk = new PublicKey();
-						String uid = pubkey.getUserIDs().next().toString();
-						pk.setRaw(new SerialBlob(pubkey.getEncoded()));
-						pk.setUid(uid);
-						pk.setBytes(pubkey.getEncoded());
-						pk.setFingerprint(Long.toHexString(pubkey.getKeyID()));
-						keys.add(pk);
+						keys.add(PublicKey.extract(pubkey));
 					}
 				}
 			}

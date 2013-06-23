@@ -15,5 +15,10 @@ public abstract class HDao<T> implements IDao<T> {
 		return em.createQuery("from " + entityClass().getSimpleName(), entityClass()).getResultList();
 	}
 	
+	@Override
+	public void persist(T entity) {
+		em.persist(entity);
+	}
+	
 	protected abstract Class<T> entityClass();
 }

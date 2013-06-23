@@ -11,6 +11,7 @@ import fr.twiced.dao.IDao;
 import fr.twiced.dao.IPublicKeyDao;
 import fr.twiced.entities.PublicKey;
 import fr.twiced.pgp.PGPHelper;
+import fr.twiced.util.StringUtil;
 
 @Service
 @Transactional
@@ -27,8 +28,12 @@ public class PublicKeyService extends AService<PublicKey> {
 		Iterator<PublicKey> it = PGPHelper.extract(stream).iterator();
 		while (it.hasNext()) {
 			PublicKey publicKey = (PublicKey) it.next();
-			if(dao.findByUid(publicKey.getUid()) == null)
-				dao.persist(publicKey);
+			if(publicKey != null && publicKey.isOpenUDCkey()){
+				boolean notEmptyFPR = StringUtil.isFilled(publicKey.getFingerprint());
+				boolean exists = notEmptyFPR && dao.findByFingerprint(publicKey.getFingerprint()) != null;
+				if(!exists)
+					dao.persist(publicKey);
+			}
 		}
 	}
 
