@@ -10,6 +10,8 @@ jludd is a Java application with an embedded HTTP server (Jetty), so you need Ja
 
     $ sudo apt-get install openjdk-6-jre maven
 
+Be warned: it is strongly adviced to install openjdk* Java provider, as it already comes with the [unlimited strength jurisdiction policy files](http://www.oracle.com/technetwork/java/javase/downloads/jce-6-download-429243.html). jludd deals with cryptography, which is still considered a nuclear weapon for most Nations, and Oracle Java is shipped with restricted cryptography capabilities. So, if you want to use jludd, either install openjdk or replace your current Java security policy files.
+
 And then, just install jludd:
 
     git clone git@github.com:c-geek/jludd.git
